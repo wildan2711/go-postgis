@@ -66,6 +66,26 @@ func TestPointS(t *testing.T) {
 	}
 }
 
+func TestPointSMarshalJSON(t *testing.T) {
+	point := PointS{4326, -7, 112}
+
+	j, err := point.MarshalJSON()
+	if err != nil {
+		t.Error(err)
+	}
+
+	p := new(PointS)
+
+	err = p.UnmarshalJSON(j)
+	if err != nil {
+		t.Error(err)
+	}
+
+	if p.X != point.X || p.Y != point.Y {
+		t.Error("Not equal")
+	}
+}
+
 func TestPointZS(t *testing.T) {
 	db := openTestConn(t)
 	defer db.Close()

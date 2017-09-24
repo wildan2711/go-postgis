@@ -4,6 +4,9 @@ import (
 	"bytes"
 	"database/sql/driver"
 	"encoding/binary"
+	"encoding/json"
+	"fmt"
+	"log"
 )
 
 // Structs respresenting varying types of points
@@ -201,6 +204,30 @@ func (p PointS) Write(buffer *bytes.Buffer) error {
 
 func (p PointS) GetType() uint32 {
 	return 0x20000001
+}
+
+func (p *PointS) MarshalJSON() ([]byte, error) {
+	res := fmt.Sprintf(`{"lat":%v, "lng":%v}`, p.X, p.Y)
+	return []byte(res), nil
+}
+
+// Decodes the current Point from a JSON body.
+// Throws an error if the body of the point cannot be interpreted by the JSON body
+func (p *PointS) UnmarshalJSON(data []byte) error {
+	// TODO throw an error if there is an issue parsing the body.
+	dec := json.NewDecoder(bytes.NewReader(data))
+	var values map[string]float64
+	err := dec.Decode(&values)
+
+	if err != nil {
+		log.Print(err)
+		return err
+	}
+
+	p.X = values["lat"]
+	p.Y = values["lng"]
+
+	return nil
 }
 
 /** PointZS functions **/
